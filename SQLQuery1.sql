@@ -1,0 +1,157 @@
+﻿-- ======================================
+-- 1. Tạo database nếu chưa có
+-- ======================================
+IF DB_ID('QLKHACHSAN2') IS NULL
+BEGIN
+    CREATE DATABASE QLKHACHSAN2;
+END
+GO
+USE QLKHACHSAN2;
+GO
+
+-- ======================================
+-- 2. Tạo bảng
+-- ======================================
+
+CREATE TABLE TAIKHOAN (
+    TENTK NVARCHAR(50) PRIMARY KEY,
+    MATKHAU NVARCHAR(50),
+    PHANQUYEN NVARCHAR(50)
+);
+
+CREATE TABLE NHANVIEN (
+    MANV NVARCHAR(50) PRIMARY KEY,
+    TENNV NVARCHAR(50),
+    SDT NVARCHAR(15),
+    CCCD NVARCHAR(20),
+    TUOI INT,
+    TENTK NVARCHAR(50) REFERENCES TAIKHOAN(TENTK)
+);
+
+CREATE TABLE PHONG (
+    MAPHONG NVARCHAR(50) PRIMARY KEY,
+    LOAIPHONG NVARCHAR(50),
+    GIAPHONG VARCHAR(30),
+    TINHTRANG NVARCHAR(50)
+);
+
+CREATE TABLE DICHVU (
+    MADV NVARCHAR(50) PRIMARY KEY,
+    TENDV NVARCHAR(50),
+    GIADV VARCHAR(30)
+);
+
+CREATE TABLE KHACHHANG (
+    MAKH NVARCHAR(50) PRIMARY KEY,
+    TENKH NVARCHAR(50),
+    CCCD NVARCHAR(20),
+    GIOTINH NVARCHAR(5),
+    SDT NVARCHAR(15),
+    MAPHONG NVARCHAR(50) REFERENCES PHONG(MAPHONG)
+);
+
+CREATE TABLE HOADON (
+    MAHD NVARCHAR(50) PRIMARY KEY,
+    MANV NVARCHAR(50) REFERENCES NHANVIEN(MANV),
+    MAKH NVARCHAR(50) REFERENCES KHACHHANG(MAKH),
+    NGAY DATE
+);
+
+CREATE TABLE CTHOADON (
+    MAHD NVARCHAR(50) REFERENCES HOADON(MAHD),
+    MADV NVARCHAR(50) REFERENCES DICHVU(MADV),
+    MAPHONG NVARCHAR(50) REFERENCES PHONG(MAPHONG),
+    SOLUONG INT,
+    GIADV VARCHAR(30),
+    THANHTIEN FLOAT
+);
+
+-- ======================================
+-- 3. Nhập dữ liệu mẫu
+-- ======================================
+
+INSERT INTO TAIKHOAN (TENTK, MATKHAU, PHANQUYEN)
+VALUES
+('admin', '12345', 'admin'),
+('trikhoi', '09876', 'user'),
+('loan', '12345', 'user'),
+('phuonganh', '12345', 'user');
+
+INSERT INTO NHANVIEN (MANV, TENNV, SDT, CCCD, TUOI, TENTK)
+VALUES
+('NV001', N'Nguyen Tri Khoi', N'123456789', 'CCCD001', 18, 'admin'),
+('NV002', N'Tran Thi Loan', N'987654321', 'CCCD002', 19, 'trikhoi'),
+('NV003', N'Le Van Phuong Em', N'555555555', 'CCCD003', 20, 'loan'),
+('NV004', N'Pham Thi D', N'333333333', 'CCCD004', 23, 'phuonganh');
+
+INSERT INTO PHONG (MAPHONG, LOAIPHONG, GIAPHONG, TINHTRANG)
+VALUES
+('P001', N'Phòng đơn', '1000000', N'Trống'),
+('P002', N'Phòng đôi', '1500000', N'Đang được sử dụng'),
+('P003', N'Vip', '2000000', N'Trống'),
+('P004', N'Phòng đơn', '1000000', N'Đang được sử dụng');
+
+INSERT INTO DICHVU (MADV, TENDV, GIADV)
+VALUES
+('DV001', N'Trái Cây', '50000'),
+('DV002', N'Nước', '100000'),
+('DV003', N'Khăn', '80000'),
+('DV004', N'Dọn lại phòng', '70000');
+
+INSERT INTO KHACHHANG (MAKH, TENKH, CCCD, GIOTINH, SDT, MAPHONG)
+VALUES
+('KH001', 'Tran Van X', 'CCCD005', 'nam', '111111111', 'P001'),
+('KH002', 'Le Thi Y', 'CCCD006', 'nữ', '222222222', 'P002'),
+('KH003', 'Nguyen Van Z', 'CCCD007', 'nam', '333333333', 'P003'),
+('KH004', 'Pham Thi W', 'CCCD008', 'nữ', '444444444', 'P004');
+
+INSERT INTO HOADON (MAHD, MANV, MAKH, NGAY)
+VALUES
+('HD001', 'NV001', 'KH001', '2023-01-01'),
+('HD002', 'NV002', 'KH002', '2023-02-01'),
+('HD003', 'NV003', 'KH003', '2023-03-01'),
+('HD004', 'NV004', 'KH004', '2023-04-01');
+
+INSERT INTO CTHOADON (MAHD, MADV, MAPHONG, SOLUONG, GIADV, THANHTIEN)
+VALUES
+('HD001', 'DV001', 'P001', 2, '50000', NULL),
+('HD002', 'DV002', 'P002', 3, '100000', NULL),
+('HD003', 'DV001', 'P003', 1, '50000', NULL),
+('HD004', 'DV002', 'P004', 2, '100000', NULL);
+
+-- ======================================
+-- 4. Trigger kiểm tra tuổi nhân viên
+-- ======================================
+
+CREATE TRIGGER CheckAgeTrigger
+ON NHANVIEN
+INSTEAD OF INSERT, UPDATE
+AS
+BEGIN
+    IF EXISTS (SELECT 1 FROM inserted WHERE TUOI < 18)
+    BEGIN
+        PRINT 'TUỔI NHÂN VIÊN PHẢI TỪ 18 TUỔI TRỞ LÊN';
+        ROLLBACK;
+    END
+    ELSE
+    BEGIN
+        INSERT INTO NHANVIEN (MANV, TENNV, SDT, CCCD, TUOI, TENTK)
+        SELECT MANV, TENNV, SDT, CCCD, TUOI, TENTK FROM inserted;
+    END
+END;
+GO
+
+-- ======================================
+-- 5. Kiểm tra dữ liệu
+-- ======================================
+
+SELECT * FROM TAIKHOAN;
+SELECT * FROM NHANVIEN;
+SELECT * FROM PHONG;
+SELECT * FROM DICHVU;
+SELECT * FROM KHACHHANG;
+SELECT * FROM HOADON;
+SELECT * FROM CTHOADON;
+
+
+select * from Phong where MaPhong = 'P002'
