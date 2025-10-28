@@ -158,5 +158,15 @@ namespace Nhom_04_QLKS
             Application.Exit();
             Environment.Exit(0);
         }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void pictureBox1_Click_1(object sender, EventArgs e)
+        {
+
+        }
     }
 }

@@ -57,7 +57,7 @@ namespace Nhom_04_QLKS
                 Font = new Font("Segoe UI", 14F, FontStyle.Bold),
                 ForeColor = Color.White,
                 AutoSize = true,
-                Location = new Point(90, 25)
+                Location = new Point(100, 25)
             };
 
             // Message
