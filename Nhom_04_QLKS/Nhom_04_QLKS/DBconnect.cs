@@ -12,7 +12,7 @@ namespace Nhom_04_QLKS
         // Constructor: CHỈ khởi tạo connection, KHÔNG test
         public DBConnect()
         {
-            conn = new SqlConnection("Data Source=DESKTOP-L4JFPFV;Initial Catalog=QLKHACHSAN2;Integrated Security=True;Connect Timeout=30;Encrypt=True;TrustServerCertificate=True;");
+            conn = new SqlConnection("Data Source=LAPTOP-VIET\\SQLEXPRESS;Initial Catalog=QLKHACHSAN;Integrated Security=True;Connect Timeout=30;Encrypt=True;TrustServerCertificate=True;");
         }
 
         // Method riêng để test connection (gọi khi cần)
